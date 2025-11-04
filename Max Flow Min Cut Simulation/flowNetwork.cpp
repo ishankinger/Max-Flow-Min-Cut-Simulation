@@ -202,7 +202,7 @@ public:
 			shape2.setPosition(start);
 			shape2.setRotation(angle);
 
-			float fmr = (endNode->getRadius() * (std::sqrt(3) / 2.0f));
+			float fmr = (endNode->getRadius() * ((float)std::sqrt(3) / 2.0f));
 			sf::Vector2f tip = start + sf::Vector2f(unitVector.x, unitVector.y) * fmr;
 			sf::Vector2f left = tip + sf::Vector2f(unitVector.x, unitVector.y) * triLength + sf::Vector2f(unitVector.y, -unitVector.x) * (triWidth / 2);
 			sf::Vector2f right = tip + sf::Vector2f(unitVector.x, unitVector.y) * triLength + sf::Vector2f(-unitVector.y, unitVector.x) * (triWidth / 2);
