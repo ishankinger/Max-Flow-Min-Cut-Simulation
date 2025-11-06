@@ -1,12 +1,8 @@
-#include "demo.h"
-#include "HomeWindow.h"
-#include "flowNetwork.hpp"
-#include <stdexcept>
+#include "HomeWindow.hpp"
 
 int main() {
 	try {
-
-	testFunc();
+		runSimuation();
 	}
 	catch (std::exception e) {
 		std::cout << e.what() << "\n";
