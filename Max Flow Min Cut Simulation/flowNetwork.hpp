@@ -8,6 +8,9 @@
 #include <cmath>
 
 #define nodeColor sf::Color(253, 204, 0)
+#define nodeColor2 sf::Color(173, 216, 230)
+#define nodeColor3 sf::Color(173, 216, 230)
+#define nodeColor4 sf::Color(213, 255, 255)
 #define fadeColor sf::Color(253, 204, 0)
 
 class Node;

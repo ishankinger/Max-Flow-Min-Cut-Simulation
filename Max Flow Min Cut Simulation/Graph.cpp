@@ -174,9 +174,12 @@ char Graph::getNode(int value) {
 
 void Graph::updateGraph(sf::Vector2f start, sf::Vector2f end) {
 	sf::Vector2f dirVector = end - start;
-	if (dirVector.x == 0 && dirVector.y == 0)
-		return;
+	if (dirVector.x == 0 && dirVector.y == 0) {
+		dirVector.x = 0.000001;
+		dirVector.y = 0.000001;
+	}
 
+	int nodeInd = -1;
 	for (int i = 0; i < (int)nodeList.size(); i++) {
 		if (nodeList[i].isPres(start)) {
 
@@ -191,6 +194,7 @@ void Graph::updateGraph(sf::Vector2f start, sf::Vector2f end) {
 
 			Node newNode(val, 30.0f, nodeColor, newPos, font);
 			nodeList[i] = newNode;
+			nodeInd = i;
 			break;
 		}
 	}
@@ -213,6 +217,40 @@ void Graph::updateGraph(sf::Vector2f start, sf::Vector2f end) {
 			edgeList.push_back(Edge(nodeList[u - 1], nodeList[v - 1]));
 		}
 	}
+
+	if (isResidual) {
+		for (int j = 0; j < (int)resEdgeList.size(); j++) {
+			if (resEdgeList[j].getStartNode() == &nodeList[nodeInd]) {
+				resEdgeList[j].getEndNode()->setColor(nodeColor);
+				tableList[3 + 3 * j].setBackgroundColor(nodeColor4);
+				tableList[3 + 3 * j + 1].setBackgroundColor(nodeColor4);
+				tableList[3 + 3 * j + 2].setBackgroundColor(nodeColor4);
+			}
+			else if (resEdgeList[j].getEndNode() == &nodeList[nodeInd]) {
+				resEdgeList[j].getStartNode()->setColor(nodeColor);
+				tableList[3 + 3 * j].setBackgroundColor(nodeColor4);
+				tableList[3 + 3 * j + 1].setBackgroundColor(nodeColor4);
+				tableList[3 + 3 * j + 2].setBackgroundColor(nodeColor4);
+			}
+		}
+	}
+	else {
+		for (int j = 0; j < (int)edgeList.size(); j++) {
+			if (edgeList[j].getStartNode() == &nodeList[nodeInd]) {
+				edgeList[j].getEndNode()->setColor(nodeColor);
+				tableList[3 + 3 * j].setBackgroundColor(nodeColor4);
+				tableList[3 + 3 * j + 1].setBackgroundColor(nodeColor4);
+				tableList[3 + 3 * j + 2].setBackgroundColor(nodeColor4);
+			}
+			else if (edgeList[j].getEndNode() == &nodeList[nodeInd]) {
+				edgeList[j].getStartNode()->setColor(nodeColor);
+				tableList[3 + 3 * j].setBackgroundColor(nodeColor4);
+				tableList[3 + 3 * j + 1].setBackgroundColor(nodeColor4);
+				tableList[3 + 3 * j + 2].setBackgroundColor(nodeColor4);
+			}
+		}
+	}
+
 }
 
 void Graph::hideEdges(sf::Vector2f start) {
@@ -252,9 +290,17 @@ void Graph::showEdges(sf::Vector2f start, Node& fadeNode, sf::RenderWindow &wind
 				for (int j = 0; j < (int)resEdgeList.size(); j++) {
 					if (resEdgeList[j].getStartNode() == &nodeList[i]) {
 						newEdges.push_back(ResidualEdge(fadeNode, *resEdgeList[j].getEndNode()));
+						resEdgeList[j].getEndNode()->setColor(nodeColor2);
+						tableList[3 + 3 * j].setBackgroundColor(nodeColor);
+						tableList[3 + 3 * j + 1].setBackgroundColor(nodeColor);
+						tableList[3 + 3 * j + 2].setBackgroundColor(nodeColor);
 					}
 					else if (resEdgeList[j].getEndNode() == &nodeList[i]) {
 						newEdges.push_back(ResidualEdge(fadeNode, *resEdgeList[j].getStartNode()));
+						resEdgeList[j].getStartNode()->setColor(nodeColor2);
+						tableList[3 + 3 * j].setBackgroundColor(nodeColor);
+						tableList[3 + 3 * j + 1].setBackgroundColor(nodeColor);
+						tableList[3 + 3 * j + 2].setBackgroundColor(nodeColor);
 					}
 				}
 				break;
@@ -270,9 +316,17 @@ void Graph::showEdges(sf::Vector2f start, Node& fadeNode, sf::RenderWindow &wind
 				for (int j = 0; j < (int)edgeList.size(); j++) {
 					if (edgeList[j].getStartNode() == &nodeList[i]) {
 						newEdges.push_back(Edge(fadeNode, *edgeList[j].getEndNode()));
+						edgeList[j].getEndNode()->setColor(nodeColor2);
+						tableList[3 + 3 * j].setBackgroundColor(nodeColor);
+						tableList[3 + 3 * j + 1].setBackgroundColor(nodeColor);
+						tableList[3 + 3 * j + 2].setBackgroundColor(nodeColor);
 					}
 					else if (edgeList[j].getEndNode() == &nodeList[i]) {
 						newEdges.push_back(Edge(*edgeList[j].getStartNode(), fadeNode));
+						edgeList[j].getStartNode()->setColor(nodeColor2);
+						tableList[3 + 3 * j].setBackgroundColor(nodeColor);
+						tableList[3 + 3 * j + 1].setBackgroundColor(nodeColor);
+						tableList[3 + 3 * j + 2].setBackgroundColor(nodeColor);
 					}
 				}
 				break;

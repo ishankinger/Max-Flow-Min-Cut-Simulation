@@ -60,8 +60,6 @@ void Node::updatePosition(sf::Vector2f pos, char value) {
 	shape.setPosition(pos);
 	std::string val; val.push_back(value);
 	text.setString(val);
-	//shape.setFillColor(sf::Color::Yellow);
-	//shape.setOutlineThickness(1);
 	sf::Vector2f center = shape.getPosition() + sf::Vector2f(shape.getRadius() / 1.5f, shape.getRadius() / 2.5f);
 	text.setPosition(center);
 }
