@@ -7,9 +7,13 @@ Edge::Edge() {
 	startNode = nullptr;
 	endNode = nullptr;
 	toShow = 0;
+	capacity = 0;
+	flow = 0;
 }
 
-Edge::Edge(Node& u, Node& v, float tl, float tw) {
+Edge::Edge(Node& u, Node& v, int c, int f, float tl, float tw) {
+	capacity = c;
+	flow = f;
 	startNode = &u;
 	endNode = &v;
 	triLength = tl;
@@ -68,4 +72,8 @@ Node* Edge::getEndNode() {
 
 void Edge::hideEdge() {
 	toShow = 0;
+}
+
+void Edge::updateFlow(int newFlow) {
+	flow = newFlow;
 }

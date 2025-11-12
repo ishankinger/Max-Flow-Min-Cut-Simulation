@@ -1,6 +1,8 @@
 #include "flowNetwork.hpp"
 
 ResidualEdge::ResidualEdge() {
+	forwardVal = 0;
+	backwardVal = 0;
 	length1 = 0;
 	length2 = 0;
 	triLength = 0;
@@ -10,7 +12,9 @@ ResidualEdge::ResidualEdge() {
 	toShow = 0;
 }
 
-ResidualEdge::ResidualEdge(Node& u, Node& v, float tl, float tw) {
+ResidualEdge::ResidualEdge(Node& u, Node& v, int fv, int bv, float tl, float tw) {
+	forwardVal = fv;
+	backwardVal = bv;
 	startNode = &u;
 	endNode = &v;
 	triLength = tl;
@@ -109,4 +113,16 @@ Node* ResidualEdge::getEndNode() {
 
 void ResidualEdge::hideEdge() {
 	toShow = 0;
+}
+
+void ResidualEdge::highlight_forward(sf::Color color) {
+	shape1.setFillColor(color);
+	direct1.setFillColor(color);
+	shape1.setSize(sf::Vector2f(length1, 5.0f));
+}
+
+void ResidualEdge::highlight_backward(sf::Color color) {
+	shape2.setFillColor(color);
+	shape2.setSize(sf::Vector2f(length2, 5.0f));
+	direct2.setFillColor(color);
 }

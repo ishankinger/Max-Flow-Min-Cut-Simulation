@@ -4,4 +4,4 @@
 
 #include "flowNetwork.hpp"
 
-void runSimuation();
+void runSimuation(std::vector<Graph> &listOfGraphs, sf::Font& mainFont);

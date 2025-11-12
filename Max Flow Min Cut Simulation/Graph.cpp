@@ -4,6 +4,8 @@ Graph::Graph(int n, std::vector<std::vector<int>> edges, int type, sf::Font& f) 
 	int m = (int)edges.size();
 	isResidual = type;
 	this->edges = edges;
+	netFlow = 0;
+	bottleNeck = 0;
 
 	nodeList.push_back(Node('s', 30.0f, nodeColor, { 50, 375 }, font));
 
@@ -95,14 +97,18 @@ Graph::Graph(int n, std::vector<std::vector<int>> edges, int type, sf::Font& f) 
 		for (int i = 0; i < m; i++) {
 			int u = edges[i][0];
 			int v = edges[i][1];
-			resEdgeList.push_back(ResidualEdge(nodeList[u - 1], nodeList[v - 1]));
+			int fv = edges[i][2];
+			int bv = edges[i][3];
+			resEdgeList.push_back(ResidualEdge(nodeList[u], nodeList[v], fv, bv));
 		}
 	}
 	else {
 		for (int i = 0; i < m; i++) {
 			int u = edges[i][0];
 			int v = edges[i][1];
-			edgeList.push_back(Edge(nodeList[u - 1], nodeList[v - 1]));
+			int c = edges[i][2];
+			int f = edges[i][3];
+			edgeList.push_back(Edge(nodeList[u], nodeList[v], c, f));
 		}
 	}
 
@@ -111,15 +117,17 @@ Graph::Graph(int n, std::vector<std::vector<int>> edges, int type, sf::Font& f) 
 		tableList.push_back(TextBox("Forward",  30, 2.0f, sf::Vector2f(150, 60), sf::Vector2f(1250, 40), sf::Color::Black, nodeColor, sf::Color::Black, font));
 		tableList.push_back(TextBox("Backward", 30, 2.0f, sf::Vector2f(150, 60), sf::Vector2f(1400, 40), sf::Color::Black, nodeColor, sf::Color::Black, font));
 		for (int i = 0; i < m; i++) {
-			char u = getNode(edges[i][0]-1);
-			char v = getNode(edges[i][1]-1);
+			char u = getNode(edges[i][0]);
+			char v = getNode(edges[i][1]);
 			std::string str = "";
 			str.push_back(u);
 			str += " - ";
 			str.push_back(v);
+			std::string fv = std::to_string(edges[i][2]);
+			std::string bv = std::to_string(edges[i][3]);
 			tableList.push_back(TextBox(str, 25, 2.0f, sf::Vector2f(150, 40), sf::Vector2f(1100, 40 * (i + 1) + 50), sf::Color::Black, sf::Color(213, 255, 255), sf::Color::Black, font));
-			tableList.push_back(TextBox("-", 25, 2.0f, sf::Vector2f(150, 40), sf::Vector2f(1250, 40 * (i + 1) + 50), sf::Color::Black, sf::Color(213, 255, 255), sf::Color::Black, font));
-			tableList.push_back(TextBox("-", 25, 2.0f, sf::Vector2f(150, 40), sf::Vector2f(1400, 40 * (i + 1) + 50), sf::Color::Black, sf::Color(213, 255, 255), sf::Color::Black, font));
+			tableList.push_back(TextBox(fv , 25, 2.0f, sf::Vector2f(150, 40), sf::Vector2f(1250, 40 * (i + 1) + 50), sf::Color::Black, sf::Color(213, 255, 255), sf::Color::Black, font));
+			tableList.push_back(TextBox(bv , 25, 2.0f, sf::Vector2f(150, 40), sf::Vector2f(1400, 40 * (i + 1) + 50), sf::Color::Black, sf::Color(213, 255, 255), sf::Color::Black, font));
 		}
 	}
 	else {
@@ -127,20 +135,33 @@ Graph::Graph(int n, std::vector<std::vector<int>> edges, int type, sf::Font& f) 
 		tableList.push_back(TextBox("Capacity", 30, 2.0f, sf::Vector2f(150, 60), sf::Vector2f(1250, 40), sf::Color::Black, nodeColor, sf::Color::Black, font));
 		tableList.push_back(TextBox("Flow",		30, 2.0f, sf::Vector2f(150, 60), sf::Vector2f(1400, 40), sf::Color::Black, nodeColor, sf::Color::Black, font));
 		for (int i = 0; i < m; i++) {
-			char u = getNode(edges[i][0]-1);
-			char v = getNode(edges[i][1]-1);
+			char u = getNode(edges[i][0]);
+			char v = getNode(edges[i][1]);
 			std::string str = "";
 			str.push_back(u);
 			str += " -> ";
 			str.push_back(v);
+			std::string c = std::to_string(edges[i][2]);
+			std::string f = std::to_string(edges[i][3]);
 			tableList.push_back(TextBox(str, 25, 2.0f, sf::Vector2f(150, 40), sf::Vector2f(1100, 40 * (i + 1) + 50), sf::Color::Black, sf::Color(213, 255, 255), sf::Color::Black, font));
-			tableList.push_back(TextBox("-", 25, 2.0f, sf::Vector2f(150, 40), sf::Vector2f(1250, 40 * (i + 1) + 50), sf::Color::Black, sf::Color(213, 255, 255), sf::Color::Black, font));
-			tableList.push_back(TextBox("-", 25, 2.0f, sf::Vector2f(150, 40), sf::Vector2f(1400, 40 * (i + 1) + 50), sf::Color::Black, sf::Color(213, 255, 255), sf::Color::Black, font));
+			tableList.push_back(TextBox(c  , 25, 2.0f, sf::Vector2f(150, 40), sf::Vector2f(1250, 40 * (i + 1) + 50), sf::Color::Black, sf::Color(213, 255, 255), sf::Color::Black, font));
+			tableList.push_back(TextBox(f  , 25, 2.0f, sf::Vector2f(150, 40), sf::Vector2f(1400, 40 * (i + 1) + 50), sf::Color::Black, sf::Color(213, 255, 255), sf::Color::Black, font));
 		}
+	}
+
+	if (isResidual) {
+		results.push_back(TextBox("BottleNeck",		  30, 2.0f, sf::Vector2f(150, 60), sf::Vector2f(1100, 40 * (m + 2) + 30), sf::Color::Black, nodeColor, sf::Color::Black, font));
+		results.push_back(TextBox(std::to_string(bottleNeck), 30, 2.0f, sf::Vector2f(150, 60), sf::Vector2f(1250, 40 * (m + 2) + 30), sf::Color::Black, nodeColor4, sf::Color::Black, font));
+	}
+	else {
+		results.push_back(TextBox("Net Flow",		   30, 2.0f, sf::Vector2f(150, 60), sf::Vector2f(1100, 40 * (m + 2) + 30), sf::Color::Black, nodeColor, sf::Color::Black, font));
+		results.push_back(TextBox(std::to_string(netFlow), 30, 2.0f, sf::Vector2f(150, 60), sf::Vector2f(1250, 40 * (m + 2) + 30), sf::Color::Black, nodeColor4, sf::Color::Black, font));
 	}
 }
 
 void Graph::drawTo(sf::RenderWindow& window) {
+	for (auto& r : results)
+		r.drawTo(window);
 	for (auto& t : tableList)
 		t.drawTo(window);
 	for (auto& e : edgeList)
@@ -206,15 +227,20 @@ void Graph::updateGraph(sf::Vector2f start, sf::Vector2f end) {
 		for (int i = 0; i < m; i++) {
 			int u = edges[i][0];
 			int v = edges[i][1];
-			resEdgeList.push_back(ResidualEdge(nodeList[u - 1], nodeList[v - 1]));
+			int fv = edges[i][2];
+			int bv = edges[i][3];
+			resEdgeList.push_back(ResidualEdge(nodeList[u], nodeList[v], fv, bv));
 		}
+		highlightPath();
 	}
 	else {
 		edgeList = {};
 		for (int i = 0; i < m; i++) {
 			int u = edges[i][0];
 			int v = edges[i][1];
-			edgeList.push_back(Edge(nodeList[u - 1], nodeList[v - 1]));
+			int c = edges[i][2];
+			int f = edges[i][3];
+			edgeList.push_back(Edge(nodeList[u], nodeList[v], c, f));
 		}
 	}
 
@@ -250,7 +276,6 @@ void Graph::updateGraph(sf::Vector2f start, sf::Vector2f end) {
 			}
 		}
 	}
-
 }
 
 void Graph::hideEdges(sf::Vector2f start) {
@@ -289,14 +314,14 @@ void Graph::showEdges(sf::Vector2f start, Node& fadeNode, sf::RenderWindow &wind
 			if (nodeList[i].isPres(start)) {
 				for (int j = 0; j < (int)resEdgeList.size(); j++) {
 					if (resEdgeList[j].getStartNode() == &nodeList[i]) {
-						newEdges.push_back(ResidualEdge(fadeNode, *resEdgeList[j].getEndNode()));
+						newEdges.push_back(ResidualEdge(fadeNode, *resEdgeList[j].getEndNode(), -1, -1));
 						resEdgeList[j].getEndNode()->setColor(nodeColor2);
 						tableList[3 + 3 * j].setBackgroundColor(nodeColor);
 						tableList[3 + 3 * j + 1].setBackgroundColor(nodeColor);
 						tableList[3 + 3 * j + 2].setBackgroundColor(nodeColor);
 					}
 					else if (resEdgeList[j].getEndNode() == &nodeList[i]) {
-						newEdges.push_back(ResidualEdge(fadeNode, *resEdgeList[j].getStartNode()));
+						newEdges.push_back(ResidualEdge(fadeNode, *resEdgeList[j].getStartNode(), -1, -1));
 						resEdgeList[j].getStartNode()->setColor(nodeColor2);
 						tableList[3 + 3 * j].setBackgroundColor(nodeColor);
 						tableList[3 + 3 * j + 1].setBackgroundColor(nodeColor);
@@ -315,14 +340,14 @@ void Graph::showEdges(sf::Vector2f start, Node& fadeNode, sf::RenderWindow &wind
 			if (nodeList[i].isPres(start)) {
 				for (int j = 0; j < (int)edgeList.size(); j++) {
 					if (edgeList[j].getStartNode() == &nodeList[i]) {
-						newEdges.push_back(Edge(fadeNode, *edgeList[j].getEndNode()));
+						newEdges.push_back(Edge(fadeNode, *edgeList[j].getEndNode(), -1, -1));
 						edgeList[j].getEndNode()->setColor(nodeColor2);
 						tableList[3 + 3 * j].setBackgroundColor(nodeColor);
 						tableList[3 + 3 * j + 1].setBackgroundColor(nodeColor);
 						tableList[3 + 3 * j + 2].setBackgroundColor(nodeColor);
 					}
 					else if (edgeList[j].getEndNode() == &nodeList[i]) {
-						newEdges.push_back(Edge(*edgeList[j].getStartNode(), fadeNode));
+						newEdges.push_back(Edge(*edgeList[j].getStartNode(), fadeNode, -1, -1));
 						edgeList[j].getStartNode()->setColor(nodeColor2);
 						tableList[3 + 3 * j].setBackgroundColor(nodeColor);
 						tableList[3 + 3 * j + 1].setBackgroundColor(nodeColor);
@@ -332,8 +357,54 @@ void Graph::showEdges(sf::Vector2f start, Node& fadeNode, sf::RenderWindow &wind
 				break;
 			}
 		}
-
 		for (auto& e : newEdges)
 			e.drawTo(window);
 	}
+}
+
+void Graph::highlightPath(std::vector<std::vector<int>> highlightEdges) {
+	this->highlightEdges = highlightEdges;
+	for (int i = 0; i < (int)highlightEdges.size(); i++) {
+		int u = highlightEdges[i][0];
+		int v = highlightEdges[i][1];
+		int type = highlightEdges[i][2];
+		for (int j = 0; j < (int)edges.size(); j++) {
+			if (u == edges[j][0] && v == edges[j][1]) {
+				if (type) {
+					resEdgeList[j].highlight_forward(nodeColor5);
+				}
+				else {
+					resEdgeList[j].highlight_backward(nodeColor5);
+				}
+			}
+		}
+	}
+}
+
+void Graph::highlightPath() {
+	for (int i = 0; i < (int)highlightEdges.size(); i++) {
+		int u = highlightEdges[i][0];
+		int v = highlightEdges[i][1];
+		int type = highlightEdges[i][2];
+		for (int j = 0; j < (int)edges.size(); j++) {
+			if (u == edges[j][0] && v == edges[j][1]) {
+				if (type) {
+					resEdgeList[j].highlight_forward(nodeColor5);
+				}
+				else {
+					resEdgeList[j].highlight_backward(nodeColor5);
+				}
+			}
+		}
+	}
+}
+
+void Graph::setNetFlow(int f) {
+	results[1].setText(std::to_string(f));
+	netFlow = f;
+}
+
+void Graph::setBottleNeck(int b) {
+	results[1].setText(std::to_string(b));
+	bottleNeck = b;
 }

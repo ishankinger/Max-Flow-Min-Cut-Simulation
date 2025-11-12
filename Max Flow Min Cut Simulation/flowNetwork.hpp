@@ -11,6 +11,7 @@
 #define nodeColor2 sf::Color(173, 216, 230)
 #define nodeColor3 sf::Color(173, 216, 230)
 #define nodeColor4 sf::Color(213, 255, 255)
+#define nodeColor5 sf::Color(0, 0, 139)
 #define fadeColor sf::Color(253, 204, 0)
 
 class Node;
@@ -42,6 +43,8 @@ public:
 
 class Edge {
 private:
+	int capacity;
+	int flow;
 	float length;
 	float triLength;
 	float triWidth;
@@ -53,17 +56,20 @@ private:
 
 public:
 	Edge();
-	Edge(Node& u, Node& v, float tl = 20.f, float tw = 15.f);
+	Edge(Node& u, Node& v, int capacity, int flow, float tl = 20.f, float tw = 15.f);
 	void setColor(sf::Color color);
 	void setThickness(int thick);
 	void drawTo(sf::RenderWindow& window);
 	Node* getStartNode();
 	Node* getEndNode();
 	void hideEdge();
+	void updateFlow(int newFlow);
 };
 
 class ResidualEdge {
 private:
+	int forwardVal;
+	int backwardVal;
 	float length1;
 	float length2;
 	float triLength;
@@ -78,7 +84,7 @@ private:
 
 public:
 	ResidualEdge();
-	ResidualEdge(Node& u, Node& v, float tl = 20.f, float tw = 15.f);
+	ResidualEdge(Node& u, Node& v, int fv, int bv, float tl = 20.f, float tw = 15.f);
 	void addEdge(int up);
 	void setColor(sf::Color color);
 	void setThickness(int thick);
@@ -86,10 +92,14 @@ public:
 	Node* getStartNode();
 	Node* getEndNode();
 	void hideEdge();
+	void highlight_forward(sf::Color color);
+	void highlight_backward(sf::Color color);
 };
 
 class Graph {
 private:
+	int netFlow;
+	int bottleNeck;
 	int isResidual;
 	std::vector<Node> nodeList;
 	std::vector<Edge> edgeList;
@@ -97,6 +107,8 @@ private:
 	sf::Font& font;
 	std::vector<std::vector<int>> edges;
 	std::vector<TextBox> tableList;
+	std::vector<TextBox> results;
+	std::vector<std::vector<int>> highlightEdges;
 
 public:
 	Graph(int n, std::vector<std::vector<int>> edges, int type, sf::Font& f);
@@ -106,6 +118,10 @@ public:
 	char getNode(int);
 	void hideEdges(sf::Vector2f start);
 	void showEdges(sf::Vector2f start, Node& fadeNode, sf::RenderWindow& window);
+	void highlightPath(std::vector<std::vector<int>> edges);
+	void highlightPath();
+	void setNetFlow(int flow);
+	void setBottleNeck(int b);
 };
 
 class TextBox {

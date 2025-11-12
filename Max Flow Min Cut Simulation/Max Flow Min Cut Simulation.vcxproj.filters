@@ -36,6 +36,9 @@
     <ClCompile Include="TextBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FordFulkerson.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="flowNetwork.hpp">
@@ -44,5 +47,12 @@
     <ClInclude Include="HomeWindow.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FordFulkerson.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="take_input.txt" />
+    <Text Include="test_cases.txt" />
   </ItemGroup>
 </Project>
