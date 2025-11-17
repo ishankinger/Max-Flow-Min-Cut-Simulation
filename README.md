@@ -50,3 +50,8 @@ The graph is loaded from the `take_input.txt` file. The format is:
 *Note: Nodes are 1-indexed in the input file but are converted to 0-indexed internally. The source is assumed to be node `1` and the sink is node `N`.*
 
 **Example `take_input.txt`:**lo
+
+## Demo
+![file1](file1.png)
+![file2](file2.png)
+![file3](file3.png)
